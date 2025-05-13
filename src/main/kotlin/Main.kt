@@ -15,6 +15,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -28,6 +29,7 @@ fun App() {
     val space = 6.dp
     val aNinja = MainViewModel.aFlow.collectAsState()
     val bNinja = MainViewModel.bFlow.collectAsState()
+    val cNinja = MainViewModel.cFlow.collectAsState()
     val sNinja = MainViewModel.sFlow.collectAsState()
     val state = MainViewModel.state.collectAsState()
     val text = remember { mutableStateOf("") }
@@ -100,9 +102,9 @@ fun App() {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
 
                 // aaa
+                Spacer(modifier = Modifier.height(20.dp))
                 Image(painter = painterResource("a.png"), contentDescription = null, modifier = Modifier.padding(3.dp))
                 FlowRow(
                     modifier = Modifier,
@@ -120,8 +122,8 @@ fun App() {
                     }
                 }
 
+                // bbb
                 Spacer(modifier = Modifier.height(20.dp))
-                // aaa
                 Image(painter = painterResource("b.png"), contentDescription = null, modifier = Modifier.padding(3.dp))
                 FlowRow(
                     modifier = Modifier,
@@ -138,14 +140,36 @@ fun App() {
                         }
                     }
                 }
+
+                // ccc
+                Spacer(modifier = Modifier.height(20.dp))
+                Image(painter = painterResource("c.png"), contentDescription = null, modifier = Modifier.padding(3.dp))
+                FlowRow(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.spacedBy(space),
+                    verticalArrangement = Arrangement.spacedBy(space)
+                ) {
+                    cNinja.value.forEach {
+                        NinjiaItem(it) { ninja: Ninja ->
+                            if (state.value == 0) {
+                                MainViewModel.ban(ninja)
+                            } else {
+                                MainViewModel.reborn(ninja)
+                            }
+                        }
+                    }
+                }
+                if(state.value == 0){
+                    Text("作者：B站/抖音：无情胡萝卜", fontSize = 8.sp)
+                }
             }
         }
     }
 }
 
 fun main() = application {
-    val state = rememberWindowState(width = 1200.dp, height = 800.dp)
-    Window(onCloseRequest = ::exitApplication, state = state) {
+//    val state = rememberWindowState(width = 1200.dp, height = 800.dp)
+    Window(onCloseRequest = ::exitApplication, title = "火影手游BP") {
         App()
     }
 }

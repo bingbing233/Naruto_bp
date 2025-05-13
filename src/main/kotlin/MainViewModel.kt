@@ -75,20 +75,20 @@ object MainViewModel {
     fun showCur(){
         scope.launch {
             state.emit(0)
-            cFlow.emit(curC)
-            bFlow.emit(curB)
-            aFlow.emit(curA)
-            sFlow.emit(curS)
+            cFlow.emit(curC.toMutableSet())
+            bFlow.emit(curB.toMutableSet())
+            aFlow.emit(curA.toMutableSet())
+            sFlow.emit(curS.toMutableSet())
         }
     }
 
     fun showBan(){
         scope.launch {
             state.emit(1)
-            cFlow.emit(banC)
-            bFlow.emit(banB)
-            aFlow.emit(banA)
-            sFlow.emit(banS)
+            cFlow.emit(banC.toMutableSet())
+            bFlow.emit(banB.toMutableSet())
+            aFlow.emit(banA.toMutableSet())
+            sFlow.emit(banS.toMutableSet())
         }
     }
 
@@ -133,8 +133,8 @@ object MainViewModel {
             ban.add(ninja)
 
             flow.emit(mutableSetOf())
-            delay(1)
             flow.emit(cur.toMutableSet())
+            showCur()
         }
     }
 
@@ -178,8 +178,8 @@ object MainViewModel {
             cur.add(ninja)
             ban.remove(ninja)
             flow.emit(mutableSetOf())
-            delay(1)
             flow.emit(ban.toMutableSet())
+            showBan()
         }
     }
 
@@ -196,7 +196,7 @@ object MainViewModel {
             curA.addAll(aNinja)
             curS.addAll(sNinja)
             curB.addAll(bNinja)
-//            curC.addAll(cNinja)
+            curC.addAll(cNinja)
             aFlow.emit(curA.toMutableSet())
             bFlow.emit(curB.toMutableSet())
             cFlow.emit(curC.toMutableSet())

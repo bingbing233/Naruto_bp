@@ -36,7 +36,7 @@ fun App() {
     MaterialTheme {
         Column {
             Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.width(400.dp)) {
+                Box(modifier = Modifier.width(300.dp)) {
                     OutlinedTextField(
                         value = text.value,
                         label = { Text("请输入忍者名") },
@@ -65,6 +65,15 @@ fun App() {
                     MainViewModel.search(text.value)
                 }, modifier = Modifier.height(55.dp)) {
                     Text("搜索")
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Button(
+                    onClick = {
+                        MainViewModel.save()
+                    },
+                    modifier = Modifier.height(55.dp),
+                ) {
+                    Text("保存")
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Button(
@@ -160,7 +169,7 @@ fun App() {
                     }
                 }
                 if(state.value == 0){
-                    Text("作者：B站/抖音：无情胡萝卜", fontSize = 8.sp)
+                    Text("完全免费，作者：B站/抖音：无情胡萝卜", fontSize = 8.sp)
                 }
             }
         }

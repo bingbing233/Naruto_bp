@@ -1,5 +1,8 @@
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.io.File
 
 object MainViewModel {
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -20,7 +23,7 @@ object MainViewModel {
     val state = MutableStateFlow(0) // 0 cur 1 ban
 
     init {
-        reset()
+        readLocal()
     }
 
     fun search(name: String) {
@@ -28,11 +31,11 @@ object MainViewModel {
         val searchB = mutableSetOf<Ninja>()
         val searchC = mutableSetOf<Ninja>()
         val searchS = mutableSetOf<Ninja>()
-        val fromA:MutableSet<Ninja>
-        val fromB:MutableSet<Ninja>
-        val fromC:MutableSet<Ninja>
-        val fromS:MutableSet<Ninja>
-        if(state.value == 0){
+        val fromA: MutableSet<Ninja>
+        val fromB: MutableSet<Ninja>
+        val fromC: MutableSet<Ninja>
+        val fromS: MutableSet<Ninja>
+        if (state.value == 0) {
             fromA = curA.toMutableSet()
             fromB = curB.toMutableSet()
             fromC = curC.toMutableSet()
@@ -72,7 +75,7 @@ object MainViewModel {
         }
     }
 
-    fun showCur(){
+    fun showCur() {
         scope.launch {
             state.emit(0)
             cFlow.emit(curC.toMutableSet())
@@ -82,7 +85,7 @@ object MainViewModel {
         }
     }
 
-    fun showBan(){
+    fun showBan() {
         scope.launch {
             state.emit(1)
             cFlow.emit(banC.toMutableSet())
@@ -96,7 +99,7 @@ object MainViewModel {
         scope.launch {
             val cur: MutableSet<Ninja>
             val ban: MutableSet<Ninja>
-            val flow:MutableStateFlow<MutableSet<Ninja>>
+            val flow: MutableStateFlow<MutableSet<Ninja>>
             when (ninja.level) {
                 0 -> {
                     cur = curC
@@ -142,7 +145,7 @@ object MainViewModel {
         scope.launch {
             val cur: MutableSet<Ninja>
             val ban: MutableSet<Ninja>
-            val flow:MutableStateFlow<MutableSet<Ninja>>
+            val flow: MutableStateFlow<MutableSet<Ninja>>
             when (ninja.level) {
                 0 -> {
                     cur = curC
@@ -203,6 +206,143 @@ object MainViewModel {
             sFlow.emit(curS.toMutableSet())
             state.emit(0)
         }
+    }
+
+    fun save() {
+        kotlin.runCatching {
+            val gson = Gson()
+            val json = gson.toJson(curA)
+
+            println("json:$json")
+            val fCurS = File("curS.txt")
+            val fCurA = File("curA.txt")
+            val fCurB = File("curB.txt")
+            val fCurC = File("curC.txt")
+
+            val fBanS = File("banS.txt")
+            val fBanA = File("banA.txt")
+            val fBanB = File("banB.txt")
+            val fBanC = File("banC.txt")
+
+            if (!fCurA.exists()) {
+                fCurA.createNewFile()
+            }
+            if (!fCurB.exists()) {
+                fCurB.createNewFile()
+            }
+            if (!fCurC.exists()) {
+                fCurC.createNewFile()
+            }
+            if (!fCurS.exists()) {
+                fCurS.createNewFile()
+            }
+            if (!fBanA.exists()) {
+                fBanA.createNewFile()
+            }
+            if (!fBanB.exists()) {
+                fBanB.createNewFile()
+            }
+            if (!fBanC.exists()) {
+                fBanC.createNewFile()
+            }
+            if (!fBanS.exists()) {
+                fBanS.createNewFile()
+            }
+
+            fCurA.writeText(gson.toJson(curA))
+            fCurB.writeText(gson.toJson(curB))
+            fCurC.writeText(gson.toJson(curC))
+            fCurS.writeText(gson.toJson(curS))
+
+            fBanA.writeText(gson.toJson(banA))
+            fBanB.writeText(gson.toJson(banB))
+            fBanC.writeText(gson.toJson(banC))
+            fBanS.writeText(gson.toJson(banS))
+        }.onFailure {
+            println(it)
+        }
+    }
+
+    private fun initDefaultData() {
+        scope.launch {
+            curA.addAll(aNinja)
+            curB.addAll(bNinja)
+            curC.addAll(cNinja)
+            curS.addAll(sNinja)
+            aFlow.emit(curA.toMutableSet())
+            bFlow.emit(curB.toMutableSet())
+            cFlow.emit(curC.toMutableSet())
+            sFlow.emit(curS.toMutableSet())
+        }
+    }
+
+    private fun readLocal() {
+        scope.launch {
+            kotlin.runCatching {
+                val type = object : TypeToken<ArrayList<Ninja>>() {}
+                val fCurS = File("curS.txt")
+                val fCurA = File("curA.txt")
+                val fCurB = File("curB.txt")
+                val fCurC = File("curC.txt")
+
+                val fBanS = File("banS.txt")
+                val fBanA = File("banA.txt")
+                val fBanB = File("banB.txt")
+                val fBanC = File("banC.txt")
+                val gson = Gson()
+                if (!fCurS.exists()) {
+                    fCurS.createNewFile()
+                }
+                if (!fCurA.exists()) {
+                    fCurA.createNewFile()
+                }
+                if (!fCurB.exists()) {
+                    fCurB.createNewFile()
+                }
+                if (!fCurC.exists()) {
+                    fCurC.createNewFile()
+                }
+
+                if (!fBanS.exists()) {
+                    fBanS.createNewFile()
+                }
+
+                if (!fBanA.exists()) {
+                    fBanA.createNewFile()
+                }
+
+                if (!fBanB.exists()) {
+                    fBanB.createNewFile()
+                }
+
+                if (!fBanC.exists()) {
+                    fBanC.createNewFile()
+                }
+
+                curA.addAll(gson.fromJson(fCurA.readText(), type).toMutableSet())
+                curB.addAll(gson.fromJson(fCurB.readText(), type).toMutableSet())
+                curC.addAll(gson.fromJson(fCurC.readText(), type).toMutableSet())
+                curS.addAll(gson.fromJson(fCurS.readText(), type).toMutableSet())
+
+                banA.addAll(gson.fromJson(fBanA.readText(), type).toMutableSet())
+                banB.addAll(gson.fromJson(fBanB.readText(), type).toMutableSet())
+                banC.addAll(gson.fromJson(fBanC.readText(), type).toMutableSet())
+                banS.addAll(gson.fromJson(fBanS.readText(), type).toMutableSet())
+
+                if (curA.isEmpty() || curB.isEmpty() || curC.isEmpty() || curS.isEmpty()) {
+                    initDefaultData()
+                }
+
+                aFlow.emit(curA.toMutableSet())
+                bFlow.emit(curB.toMutableSet())
+                cFlow.emit(curC.toMutableSet())
+                sFlow.emit(curS.toMutableSet())
+            }.onFailure {
+                initDefaultData()
+                println(it)
+            }
+        }
+
     }
 
 }

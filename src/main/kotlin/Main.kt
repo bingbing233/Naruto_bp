@@ -1,31 +1,151 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import com.sun.tools.javac.Main
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 @Preview
 fun App() {
-    var text by remember { mutableStateOf("Hello, World!") }
-
+    val scrollableState = rememberScrollState()
+    val space = 6.dp
+    val aNinja = MainViewModel.aFlow.collectAsState()
+    val bNinja = MainViewModel.bFlow.collectAsState()
+    val sNinja = MainViewModel.sFlow.collectAsState()
+    val state = MainViewModel.state.collectAsState()
+    val text = remember { mutableStateOf("") }
     MaterialTheme {
-        Button(onClick = {
-            text = "Hello, Desktop!"
-        }) {
-            Text(text)
+        Column {
+            Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.width(400.dp)) {
+                    OutlinedTextField(
+                        value = text.value,
+                        label = { Text("请输入忍者名") },
+                        onValueChange = { text.value = it },
+                        modifier = Modifier.width(400.dp).padding(end = 20.dp).onPreviewKeyEvent {
+                            if(it.key == Key.Enter){
+                                MainViewModel.search(text.value)
+                                true
+                            } else {
+                                false
+                            }
+                        },
+                        maxLines = 1
+                    )
+                    Row(modifier = Modifier.align(Alignment.Center).padding(end = 30.dp)) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(imageVector = Icons.Default.Close, "", modifier = Modifier.onClick {
+                            text.value = ""
+                            MainViewModel.search("")
+                        }.padding(top = 10.dp))
+                    }
+
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Button(onClick = {
+                    MainViewModel.search(text.value)
+                }, modifier = Modifier.height(55.dp)) {
+                    Text("搜索")
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Button(
+                    onClick = {
+                        MainViewModel.reset()
+                    },
+                    modifier = Modifier.height(55.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red, contentColor = Color.White),
+                ) {
+                    Text("重置")
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                RadioButton(selected = state.value == 0, onClick = { MainViewModel.showCur() })
+                Text("可用忍者")
+
+                RadioButton(selected = state.value == 1, onClick = { MainViewModel.showBan() })
+                Text("禁用忍者")
+            }
+            Column(modifier = Modifier.verticalScroll(state = scrollableState, enabled = true).padding(10.dp)) {
+                // sss
+                Image(painter = painterResource("s.png"), contentDescription = null, modifier = Modifier.padding(3.dp))
+                FlowRow(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.spacedBy(space),
+                    verticalArrangement = Arrangement.spacedBy(space)
+                ) {
+                    sNinja.value.forEach {
+                        NinjiaItem(it) { ninja: Ninja ->
+                            if (state.value == 0) {
+                                MainViewModel.ban(ninja)
+                            } else {
+                                MainViewModel.reborn(ninja)
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // aaa
+                Image(painter = painterResource("a.png"), contentDescription = null, modifier = Modifier.padding(3.dp))
+                FlowRow(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.spacedBy(space),
+                    verticalArrangement = Arrangement.spacedBy(space)
+                ) {
+                    aNinja.value.forEach {
+                        NinjiaItem(it) { ninja: Ninja ->
+                            if (state.value == 0) {
+                                MainViewModel.ban(ninja)
+                            } else {
+                                MainViewModel.reborn(ninja)
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                // aaa
+                Image(painter = painterResource("b.png"), contentDescription = null, modifier = Modifier.padding(3.dp))
+                FlowRow(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.spacedBy(space),
+                    verticalArrangement = Arrangement.spacedBy(space)
+                ) {
+                    bNinja.value.forEach {
+                        NinjiaItem(it) { ninja: Ninja ->
+                            if (state.value == 0) {
+                                MainViewModel.ban(ninja)
+                            } else {
+                                MainViewModel.reborn(ninja)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
+    val state = rememberWindowState(width = 1200.dp, height = 800.dp)
+    Window(onCloseRequest = ::exitApplication, state = state) {
         App()
     }
 }

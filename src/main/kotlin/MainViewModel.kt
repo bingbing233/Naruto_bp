@@ -1,7 +1,12 @@
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import java.io.File
 
 object MainViewModel {
@@ -23,7 +28,7 @@ object MainViewModel {
     val state = MutableStateFlow(0) // 0 cur 1 ban
 
     init {
-        readLocal()
+        read2()
     }
 
     fun search(name: String) {
@@ -258,9 +263,96 @@ object MainViewModel {
             fBanB.writeText(gson.toJson(banB))
             fBanC.writeText(gson.toJson(banC))
             fBanS.writeText(gson.toJson(banS))
+
         }.onFailure {
             println(it)
         }
+    }
+
+    fun save2() {
+        scope.launch {
+            saveData("curA", curA)
+            saveData("curB", curB)
+            saveData("curC", curC)
+            saveData("curS", curS)
+            saveData("banA", banA)
+            saveData("banB", banB)
+            saveData("banC", banC)
+            saveData("banS", banS)
+        }
+    }
+
+    private fun read2() {
+        scope.launch {
+            val strCurA = readData("curA")
+            val strCurB = readData("curB")
+            val strCurC = readData("curC")
+            val strCurS = readData("curS")
+            val strBanA = readData("banA")
+            val strBanB = readData("banB")
+            val strBanC = readData("banC")
+            val strBanS = readData("banS")
+            if (strCurA.isEmpty()) {
+                curA.addAll(aNinja)
+            } else {
+                curA.addAll(json2Set(strCurA))
+            }
+            if (strCurB.isEmpty()) {
+                curB.addAll(bNinja)
+            } else {
+                curB.addAll(json2Set(strCurB))
+            }
+            if (strCurC.isEmpty()) {
+                curC.addAll(cNinja)
+            } else {
+                curC.addAll(json2Set(strCurC))
+            }
+            if (strCurS.isEmpty()) {
+                curS.addAll(sNinja)
+            } else {
+                curS.addAll(json2Set(strCurS))
+            }
+
+            if (strBanA.isNotEmpty()) {
+                banA.addAll(json2Set(strBanA))
+            }
+
+            if (strBanB.isNotEmpty()) {
+                banB.addAll(json2Set(strBanB))
+            }
+
+            if (strBanC.isNotEmpty()) {
+                banC.addAll(json2Set(strBanC))
+            }
+
+            if (strBanS.isNotEmpty()) {
+                banS.addAll(json2Set(strBanS))
+            }
+
+            aFlow.emit(curA.toMutableSet())
+            bFlow.emit(curB.toMutableSet())
+            cFlow.emit(curC.toMutableSet())
+            sFlow.emit(curS.toMutableSet())
+        }
+    }
+
+    private fun json2Set(json: String): MutableSet<Ninja> {
+        val gson = Gson()
+        val type = object : TypeToken<ArrayList<Ninja>>() {}
+        return gson.fromJson(json, type).toMutableSet()
+    }
+
+    private suspend fun saveData(key: String, data: Set<Ninja>) {
+        val gson = Gson()
+        dataStores.edit {
+            it[stringPreferencesKey(key)] = gson.toJson(data)
+        }
+    }
+
+    private suspend fun readData(key: String): String {
+        return dataStores.data.map {
+            it[stringPreferencesKey(key)] ?: ""
+        }.first()
     }
 
     private fun initDefaultData() {

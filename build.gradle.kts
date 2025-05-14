@@ -22,6 +22,7 @@ dependencies {
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
     implementation ("com.google.code.gson:gson:2.13.1")
+    implementation("androidx.datastore:datastore-preferences:1.1.6")
 }
 
 compose.desktop {

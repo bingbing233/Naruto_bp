@@ -69,7 +69,7 @@ fun App() {
                 Spacer(modifier = Modifier.width(10.dp))
                 Button(
                     onClick = {
-                        MainViewModel.save()
+                        MainViewModel.save2()
                     },
                     modifier = Modifier.height(55.dp),
                 ) {

@@ -215,6 +215,10 @@ object MainViewModel {
 
     fun save() {
         kotlin.runCatching {
+            // 这个方法可以拿到当前的资源文件目录
+            System.getProperty("compose.application.resources.dir")
+
+
             val gson = Gson()
             val json = gson.toJson(curA)
 
